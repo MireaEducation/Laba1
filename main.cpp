@@ -122,10 +122,25 @@ while (ptr){
     ptr = ptr->next;
     }
 }
+
+//Возвращает последний элемент списка удолетворяющий условию value
+Car* getLastNodeForDelete(Car* head, string value)
+{
+	Car* last = nullptr;
+	for (Car* i = head; i->next; i = i->next)
+	{
+		if (i->type == value)
+		{
+			last = i;
+		}
+	}
+	return last;
+}
+
 //удаление элементов
-Car* deleteModel(Models* List, Car* L, string value){
+void deleteModel(Models* List, Car*& L, string value){
    Models* pointer= List;
-   Car* temp;
+   Car* temp = (Car*)malloc(sizeof(Car*));
 
 //поиск указателя на первый удаляемый элемент
 while(pointer){
@@ -135,29 +150,44 @@ while(pointer){
     pointer=pointer->next;
 }
 
-	//Если нашелся элемент, который нужно удалить
+	//Если нашелся элемент(модель), который нужно удалить
 	if (pointer && pointer->begining)
 	{
-		temp = pointer->begining;//для удобства
-
-		while (temp->type == value && temp->next) {
-			//Трюк Вирта
-			temp->country = temp->next->country;
-			temp->type = temp->next->type;
-			temp->year = temp->next->year;
-			temp->next = temp->next->next;
-		}
-
-		//удаление
-		if (temp->next == 0 || temp->next->type != value) {
-			temp = temp->next;
-			if (temp == L) {
-				L = temp->next;
-				free(temp);
+		Car* last = getLastNodeForDelete(pointer->begining, value);
+		for (Car* i = pointer->begining; i->next; i = i->next)
+		{
+			//Если это тот элемент, котоырй нужно удалить
+			if (i->next == last)
+			{
+				//следующий элемент не явл. последним ?
+				if (i->next->next)
+				{
+					//Трюк Адиля
+					Car* nextNew = i->next->next;
+					free(i->next);
+					i->next = nextNew;
+				}
+				else {
+					free(i->next);
+				}
+				return;
+			}//Если нужный элемент оказался первым в списке
+			else if (i == last)
+			{
+				if (i->next)//если такой элемент не единственный в списке всех автомобилей заданной модели
+				{//свдигаем указатель начала списка на следующий
+					//Трюк Адиля
+					Car* beginNew = i->next;
+					free(i);
+					L = beginNew;
+				}
+				else {
+					free(i);
+				}
+				return;
 			}
 		}
 	}
-return L;
 }
 
 
@@ -220,7 +250,7 @@ while(var){
         }
         case 7:{
             //удаление элементов
-            deleteModel(Spisk,List, "BMW");
+            deleteModel(Spisk,List, "BMV");
             system("pause");
             break;
         }
